@@ -45,13 +45,6 @@ input[type=range]{width:320px;margin:8px 0;}
 #playlist li{padding:10px;border-radius:8px;cursor:pointer;}
 #playlist li.active,#playlist li:hover{background:var(--card);}
 
-/* Lyrics */
-.lyrics{
-  margin-top:20px; width:100%; max-width:400px; height:120px;
-  background:var(--card); border-radius:12px; padding:10px; overflow-y:auto;
-  font-size:14px; line-height:1.5; text-align:center;
-}
-
 /* Install Toast */
 #installToast{
   position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -113,9 +106,6 @@ input[type=range]{width:320px;margin:8px 0;}
     <input type="range" id="volume" min="0" max="1" step="0.01">
     <ul id="playlist"></ul>
 
-    <!-- Lyrics -->
-    <div class="lyrics" id="lyrics">Lyrics will appear here...</div>
-
     <audio id="audio"></audio>
   </div>
 </div>
@@ -145,7 +135,6 @@ const cover=document.getElementById("cover");
 const volume=document.getElementById("volume");
 const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
-const lyricsEl=document.getElementById("lyrics");
 const waveCanvas=document.getElementById("waveCanvas");
 const waveCtx=waveCanvas.getContext("2d");
 
@@ -173,14 +162,13 @@ function drawWave(){
 }
 drawWave();
 
-// Add multiple songs repeatedly
+// Add multiple songs
 fileInput.addEventListener("change", () => { 
   [...fileInput.files].forEach(file=>{
     songs.push({
       title: file.name.replace(/\.[^/.]+$/, ""),
       src: URL.createObjectURL(file),
-      cover: "cover.jpg",
-      lyrics: "Lyrics not available"
+      cover: "cover.jpg"
     });
   });
 
@@ -196,7 +184,6 @@ function loadSong(i){
   audio.src=songs[i].src;
   title.textContent=songs[i].title;
   cover.src=songs[i].cover;
-  lyricsEl.textContent = songs[i].lyrics;
   updatePlaylist();
 }
 
