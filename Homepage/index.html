@@ -17,37 +17,41 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:var(--bg);color:var(--text);height:100vh;overflow-x:hidden;}
 
-.app{display:flex;height:calc(100vh - 90px);}
-.sidebar{width:220px;background:var(--panel);padding:20px;}
+/* Layout */
+.app{display:flex;height:100vh;flex-direction:row;}
+.sidebar{width:220px;background:var(--panel);padding:20px;flex-shrink:0;transition: transform 0.3s ease;}
 .sidebar h1{color:var(--accent)}
 .sidebar label, .sidebar button{
   margin-top:10px;padding:8px;width:100%;border:none;border-radius:8px;
   background:var(--accent);color:white;cursor:pointer;display:block;text-align:center;
 }
-.player{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;position:relative;}
-.cover{width:220px;height:220px;border-radius:16px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+.player{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;position:relative;overflow-y:auto;}
+.cover{width:220px;height:220px;border-radius:16px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.5);transition: width 0.3s, height 0.3s;}
 .controls button{background:none;border:none;font-size:26px;margin:0 10px;color:var(--text);cursor:pointer;}
 input[type=range]{width:320px;margin:8px 0;}
-#playlist{list-style:none;width:320px;margin-top:15px;}
+
+/* Playlist */
+#playlist{list-style:none;width:100%;margin-top:15px;}
 #playlist li{padding:10px;border-radius:8px;cursor:pointer;}
 #playlist li.active,#playlist li:hover{background:var(--card);}
 
-/* Lyrics Section */
+/* Lyrics */
 .lyrics{
-  margin-top:20px; width:90%; max-width:400px; height:120px;
+  margin-top:20px; width:100%; max-width:400px; height:120px;
   background:var(--card); border-radius:12px; padding:10px; overflow-y:auto;
   font-size:14px; line-height:1.5; text-align:center;
 }
 
 /* Equalizer */
-.equalizer{display:flex;justify-content:center;gap:15px;margin-top:20px;}
-.equalizer input[type=range]{transform:rotate(-90deg);width:80px;}
+.equalizer{display:flex;justify-content:center;gap:10px;margin-top:20px;}
+.equalizer input[type=range]{transform:rotate(-90deg);width:60px;}
 
 /* Mini Player */
 .mini{
   height:90px;background:var(--panel);display:flex;align-items:center;padding:10px 20px;
   position:fixed;bottom:10px;right:10px;border-radius:16px;box-shadow:0 5px 15px rgba(0,0,0,.5);
   z-index:1000;
+  transition: all 0.3s;
 }
 .mini img{width:55px;height:55px;border-radius:8px;}
 .mini .info{flex:1;margin-left:15px;}
@@ -60,24 +64,39 @@ input[type=range]{width:320px;margin:8px 0;}
   display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2000;
   transition: opacity 0.3s ease, bottom 0.3s ease;
 }
-#installToast.show{
-  display: block;
-  opacity: 1;
-  bottom: 20px;
-}
-#installToast.hide{
-  opacity: 0;
-  bottom: 0;
+#installToast.show{display: block; opacity: 1; bottom: 20px;}
+#installToast.hide{opacity: 0; bottom: 0;}
+
+/* Responsive - mobile */
+@media(max-width:700px){
+  .app{flex-direction:column;}
+  .sidebar{width:100%; transform: translateY(-100%);}
+  .sidebar.active{transform: translateY(0);}
+  .player{padding:10px;}
+  .cover{width:150px;height:150px;}
+  input[type=range]{width:90%;}
+  #playlist li{padding:8px;}
+  .equalizer input[type=range]{width:40px;}
+  .mini{bottom:70px; right:10px; height:70px; padding:5px;}
+  .mini img{width:45px;height:45px;}
+  .mini .controls button{font-size:18px; margin-left:5px;}
 }
 
-/* Responsive */
-@media(max-width:700px){.sidebar{display:none} input[type=range],#playlist{width:90%}}
+/* Hamburger for mobile */
+#menuToggle{
+  display:none; position:fixed; top:10px; left:10px; z-index:2000;
+  background:var(--accent); border:none; color:#fff; padding:10px; border-radius:8px; font-size:20px; cursor:pointer;
+}
+@media(max-width:700px){#menuToggle{display:block;}}
 </style>
 </head>
 <body>
 
+<!-- Hamburger -->
+<button id="menuToggle">☰</button>
+
 <div class="app">
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <h1>🎧 WaveBox</h1>
     <p>Feel Every Wave</p>
     <label>➕ Add Songs<input type="file" id="fileInput" multiple accept="audio/*" hidden></label>
@@ -97,7 +116,6 @@ input[type=range]{width:320px;margin:8px 0;}
       <button onclick="toggleRepeat()"><i class="fa-solid fa-repeat"></i></button>
     </div>
     <input type="range" id="volume" min="0" max="1" step="0.01">
-
     <ul id="playlist"></ul>
 
     <!-- Lyrics -->
@@ -135,6 +153,13 @@ input[type=range]{width:320px;margin:8px 0;}
 </div>
 
 <script>
+// Sidebar toggle
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('active');
+});
+
 // Core
 let songs=[], index=0, shuffle=false, repeat=false;
 const audio=document.getElementById("audio");
@@ -199,7 +224,7 @@ function updatePlaylist(){
   });
 }
 
-// Floating mini player drag
+// Mini player drag
 const mini=document.getElementById("miniPlayer");
 let isDragging=false, offsetX=0, offsetY=0;
 mini.addEventListener("mousedown", e=>{isDragging=true; offsetX=e.offsetX; offsetY=e.offsetY;});
@@ -227,7 +252,6 @@ toastBtn.addEventListener('click', async () => {
   }
 });
 
-// Optional: manual trigger
 document.getElementById('installBtn').addEventListener('click', () => {
   installToast.classList.add('show');
   setTimeout(()=>installToast.classList.remove('show'), 5000);
