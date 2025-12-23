@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WaveBox Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --bg:#0f172a; --panel:#020617; --card:#1e293b; --text:#fff; --accent:#38bdf8;
+}
+.light{
+  --bg:#f1f5f9; --panel:#fff; --card:#e5e7eb; --text:#020617; --accent:#0284c7;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:20px;
+  transition:background 0.3s,color 0.3s;
+}
+h1{margin-bottom:20px;}
+label{display:block;margin-top:15px;font-weight:bold;}
+select,input[type=file]{margin-top:5px;padding:8px;border-radius:5px;border:none;outline:none;width:200px;}
+input[type=checkbox]{margin-left:5px;}
+button{margin-top:15px;padding:10px 15px;border:none;border-radius:5px;background:var(--accent);color:#fff;cursor:pointer;transition:0.2s;}
+button:hover{opacity:0.85;}
+hr{width:100%;margin:20px 0;border:1px solid var(--card);}
+</style>
+</head>
+<body>
+
+<h1>Settings</h1>
+
+<!-- Theme -->
+<div>
+  <label for="themeSelect">Theme:</label>
+  <select id="themeSelect">
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+  </select>
+</div>
+
+<!-- Wallpaper -->
+<div>
+  <label for="wallpaperInput">Wallpaper:</label>
+  <input type="file" id="wallpaperInput" accept="image/*">
+  <button id="removeWallpaper">Remove Wallpaper</button>
+</div>
+
+<hr>
+
+<!-- Font size -->
+<div>
+  <label for="fontSizeSelect">Font Size:</label>
+  <select id="fontSizeSelect">
+    <option value="small">Small</option>
+    <option value="medium">Medium</option>
+    <option value="large">Large</option>
+  </select>
+</div>
+
+<!-- Playback quality -->
+<div>
+  <label for="qualitySelect">Playback Quality:</label>
+  <select id="qualitySelect">
+    <option value="low">Low</option>
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+  </select>
+</div>
+
+<!-- Animations -->
+<div>
+  <label>
+    <input type="checkbox" id="animationsCheckbox"> Enable Animations
+  </label>
+</div>
+
+<!-- Notifications -->
+<div>
+  <label>
+    <input type="checkbox" id="notificationsCheckbox"> Enable Notifications
+  </label>
+</div>
+
+<hr>
+
+<!-- Reset button -->
+<div>
+  <button id="resetSettings">Reset All Settings</button>
+</div>
+
+<script>
+// --- THEME ---
+const themeSelect = document.getElementById('themeSelect');
+if(localStorage.getItem('theme')){
+  document.body.classList.toggle('light', localStorage.getItem('theme')==='light');
+  themeSelect.value = localStorage.getItem('theme');
+}
+themeSelect.addEventListener('change', ()=>{
+  const theme = themeSelect.value;
+  document.body.classList.toggle('light', theme==='light');
+  localStorage.setItem('theme', theme);
+});
+
+// --- WALLPAPER ---
+const wallpaperInput = document.getElementById('wallpaperInput');
+const removeWallpaperBtn = document.getElementById('removeWallpaper');
+if(localStorage.getItem('wallpaper')){
+  document.body.style.backgroundImage = `url(${localStorage.getItem('wallpaper')})`;
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundPosition = 'center';
+}
+wallpaperInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  document.body.style.backgroundImage = `url(${url})`;
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundPosition = 'center';
+  localStorage.setItem('wallpaper', url);
+});
+removeWallpaperBtn.addEventListener('click', ()=>{
+  document.body.style.backgroundImage = '';
+  localStorage.removeItem('wallpaper');
+});
+
+// --- FONT SIZE ---
+const fontSizeSelect = document.getElementById('fontSizeSelect');
+if(localStorage.getItem('fontSize')) document.body.style.fontSize = localStorage.getItem('fontSize');
+if(localStorage.getItem('fontSize')) fontSizeSelect.value = localStorage.getItem('fontSize');
+fontSizeSelect.addEventListener('change', ()=>{
+  const size = fontSizeSelect.value;
+  if(size==='small') document.body.style.fontSize='14px';
+  else if(size==='medium') document.body.style.fontSize='16px';
+  else document.body.style.fontSize='18px';
+  localStorage.setItem('fontSize', document.body.style.fontSize);
+});
+
+// --- PLAYBACK QUALITY ---
+const qualitySelect = document.getElementById('qualitySelect');
+if(localStorage.getItem('quality')) qualitySelect.value = localStorage.getItem('quality');
+qualitySelect.addEventListener('change', ()=>{
+  localStorage.setItem('quality', qualitySelect.value);
+});
+
+// --- ANIMATIONS ---
+const animationsCheckbox = document.getElementById('animationsCheckbox');
+animationsCheckbox.checked = localStorage.getItem('animations')==='true';
+animationsCheckbox.addEventListener('change', ()=>{
+  localStorage.setItem('animations', animationsCheckbox.checked);
+});
+
+// --- NOTIFICATIONS ---
+const notificationsCheckbox = document.getElementById('notificationsCheckbox');
+notificationsCheckbox.checked = localStorage.getItem('notifications')==='true';
+notificationsCheckbox.addEventListener('change', ()=>{
+  localStorage.setItem('notifications', notificationsCheckbox.checked);
+});
+
+// --- RESET ---
+document.getElementById('resetSettings').addEventListener('click', ()=>{
+  if(confirm('Are you sure you want to reset all settings?')){
+    localStorage.clear();
+    location.reload();
+  }
+});
+</script>
+
+</body>
+</html>
