@@ -30,6 +30,16 @@ body{background:var(--bg);color:var(--text);height:100vh;overflow-x:hidden;}
 .controls button{background:none;border:none;font-size:26px;margin:0 10px;color:var(--text);cursor:pointer;}
 input[type=range]{width:320px;margin:8px 0;}
 
+/* Waveform progress */
+#waveCanvas{
+  width: 90%;
+  max-width: 400px;
+  height: 60px;
+  margin: 15px 0;
+  border-radius: 12px;
+  background: var(--card);
+}
+
 /* Playlist */
 #playlist{list-style:none;width:100%;margin-top:15px;}
 #playlist li{padding:10px;border-radius:8px;cursor:pointer;}
@@ -41,10 +51,6 @@ input[type=range]{width:320px;margin:8px 0;}
   background:var(--card); border-radius:12px; padding:10px; overflow-y:auto;
   font-size:14px; line-height:1.5; text-align:center;
 }
-
-/* Equalizer */
-.equalizer{display:flex;justify-content:center;gap:10px;margin-top:20px;}
-.equalizer input[type=range]{transform:rotate(-90deg);width:60px;}
 
 /* Mini Player */
 .mini{
@@ -74,9 +80,9 @@ input[type=range]{width:320px;margin:8px 0;}
   .sidebar.active{transform: translateY(0);}
   .player{padding:10px;}
   .cover{width:150px;height:150px;}
+  #waveCanvas{height:40px;}
   input[type=range]{width:90%;}
   #playlist li{padding:8px;}
-  .equalizer input[type=range]{width:40px;}
   .mini{bottom:70px; right:10px; height:70px; padding:5px;}
   .mini img{width:45px;height:45px;}
   .mini .controls button{font-size:18px; margin-left:5px;}
@@ -107,7 +113,10 @@ input[type=range]{width:320px;margin:8px 0;}
   <div class="player">
     <img id="cover" class="cover" src="cover.jpg">
     <h2 id="title">No song selected</h2>
-    <input type="range" id="progress" value="0">
+
+    <!-- Waveform Canvas -->
+    <canvas id="waveCanvas"></canvas>
+
     <div class="controls">
       <button onclick="toggleShuffle()"><i class="fa-solid fa-shuffle"></i></button>
       <button onclick="prevSong()"><i class="fa-solid fa-backward"></i></button>
@@ -121,13 +130,6 @@ input[type=range]{width:320px;margin:8px 0;}
     <!-- Lyrics -->
     <div class="lyrics" id="lyrics">Lyrics will appear here...</div>
 
-    <!-- Equalizer -->
-    <div class="equalizer">
-      <input type="range" id="bass" min="-10" max="10" value="0">
-      <input type="range" id="mid" min="-10" max="10" value="0">
-      <input type="range" id="treble" min="-10" max="10" value="0">
-    </div>
-
     <audio id="audio"></audio>
   </div>
 </div>
@@ -137,7 +139,6 @@ input[type=range]{width:320px;margin:8px 0;}
   <img id="miniCover" src="cover.jpg">
   <div class="info">
     <div id="miniTitle">No song</div>
-    <input type="range" id="miniProgress" value="0">
   </div>
   <button onclick="playPause()"><i class="fa-solid fa-play"></i></button>
   <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
@@ -167,12 +168,36 @@ const title=document.getElementById("title");
 const cover=document.getElementById("cover");
 const miniCover=document.getElementById("miniCover");
 const miniTitle=document.getElementById("miniTitle");
-const progress=document.getElementById("progress");
-const miniProgress=document.getElementById("miniProgress");
 const volume=document.getElementById("volume");
 const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
 const lyricsEl=document.getElementById("lyrics");
+const waveCanvas=document.getElementById("waveCanvas");
+const waveCtx=waveCanvas.getContext("2d");
+
+// Resize canvas
+function resizeCanvas(){waveCanvas.width = waveCanvas.clientWidth; waveCanvas.height = waveCanvas.clientHeight;}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+// Draw wave progress
+function drawWave(){
+  const width=waveCanvas.width, height=waveCanvas.height;
+  waveCtx.clearRect(0,0,width,height);
+
+  const progressWidth = (audio.currentTime/audio.duration||0) * width;
+
+  // Background bar
+  waveCtx.fillStyle = "#555";
+  waveCtx.fillRect(0, height/3, width, height/3);
+
+  // Progress bar
+  waveCtx.fillStyle = "#38bdf8";
+  waveCtx.fillRect(0, height/3, progressWidth, height/3);
+
+  requestAnimationFrame(drawWave);
+}
+drawWave();
 
 // Add multiple songs repeatedly
 fileInput.addEventListener("change", () => { 
@@ -209,12 +234,6 @@ function prevSong(){if(!songs.length) return; index = (index-1+songs.length)%son
 function toggleShuffle(){shuffle=!shuffle;}
 function toggleRepeat(){repeat=!repeat; audio.loop=repeat;}
 function toggleTheme(){document.body.classList.toggle("light");}
-
-// Sliders
-audio.addEventListener("timeupdate",()=>{const p=(audio.currentTime/audio.duration)*100||0; progress.value=miniProgress.value=p;});
-progress.oninput=()=>audio.currentTime=(progress.value/100)*audio.duration;
-miniProgress.oninput=progress.oninput;
-volume.oninput=()=>audio.volume=volume.value;
 
 // Playlist
 function updatePlaylist(){
