@@ -14,112 +14,98 @@
   --bg:#f1f5f9; --card:#e5e7eb; --text:#020617; --accent:#0284c7;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:var(--bg);color:var(--text);height:100vh;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;}
-
-/* Player container */
+body{
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
 .player{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:20px;
-  max-width:400px;
-  width:100%;
-  position:relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+  width: 100%;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
 }
-
-/* Now Playing Card */
-.now-playing{
-  background:var(--card);
-  border-radius:20px;
-  padding:20px;
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  box-shadow:0 8px 20px rgba(0,0,0,0.6);
-  margin-bottom:20px;
-  transition:all 0.3s ease;
+.cover{
+  width: 220px;
+  height: 220px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+  transition: width 0.3s, height 0.3s;
+  margin-bottom: 15px;
 }
-.now-playing img{
-  width:220px;
-  height:220px;
-  border-radius:16px;
-  object-fit:cover;
-  margin-bottom:15px;
-  box-shadow:0 0 30px var(--accent);
+#title-container{
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 15px;
 }
-.now-playing h2{
-  font-size:22px;
-  margin-bottom:15px;
-  text-align:center;
+#title{
+  display: inline-block;
+  font-size: 20px;
+  text-align: center;
+  animation: marquee 10s linear infinite;
 }
-
-/* Controls */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
 .controls{
   display:flex;
   justify-content:center;
   align-items:center;
-  margin:10px 0;
+  margin:15px 0;
 }
 .controls button{
   background:none;
   border:none;
   font-size:26px;
   margin:0 10px;
-  color:var(--text);
+  color: var(--text);
   cursor:pointer;
 }
-
-/* Progress bar */
 #progressContainer{
-  width:100%;
+  width:80%;
   height:8px;
-  background:var(--bg);
+  background: var(--card);
   border-radius:4px;
   margin:10px 0;
+  cursor:pointer;
   position:relative;
   overflow:hidden;
 }
 #progressCanvas{
   position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-}
-
-/* Up Next */
-.up-next{
-  width:100%;
-}
-.up-next h3{
-  margin-bottom:10px;
-  text-align:left;
+  top:0; left:0;
+  width:100%; height:100%;
 }
 #playlist{
   list-style:none;
   width:100%;
-  max-height:200px;
+  margin-top:15px;
   overflow-y:auto;
-  padding-right:5px;
+  flex:1;
+  padding-bottom:80px; /* space for floating button */
 }
 #playlist li{
   padding:10px;
-  border-radius:12px;
+  border-radius:8px;
   cursor:pointer;
   margin-bottom:5px;
   background:var(--card);
-  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
 }
-#playlist li:hover{
-  background:var(--accent);
-}
-#playlist li.playing{
-  background:var(--accent);
-  font-weight:bold;
-}
-
-/* Floating Add Button */
+#playlist li:hover{background:var(--accent);}
+#playlist li.playing{background:var(--accent); font-weight:bold;}
+#playlist li span{margin-right:10px;}
 #addSongBtn{
   position:fixed;
   bottom:20px;
@@ -140,103 +126,31 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;justify-co
 }
 #addSongBtn:hover{transform:scale(1.1);}
 #fileInput{display:none;}
-
-/* Responsive */
 @media(max-width:450px){
-  .now-playing img{width:150px;height:150px;}
+  .cover{width:150px;height:150px;}
   .controls button{font-size:22px;margin:0 5px;}
+  #title{font-size:16px;}
 }
-#nowPlayingTitle {
-  width: 90%;         /* Visible width */
-  overflow: hidden;   /* Hide overflowing text */
-  white-space: nowrap; 
-  box-sizing: border-box;
-  text-align: center;
-  margin: 10px 0;
-}
-
-#title {
-  display: inline-block;
-  padding-left: 100%;   /* Start outside view */
-  animation: scrollTitle 10s linear infinite; /* Scroll continuously */
-}
-
-@keyframes scrollTitle {
-  0%   { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
-}
-body {
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 0; /* remove top padding */
-}
-
-.player {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  max-width: 400px;
-  width: 100%;
-  height: 100vh;          /* Full height */
-  box-sizing: border-box;
-}
-#playlist {
-  list-style: none;
-  width: 100%;
-  margin-top: 15px;
-  overflow-y: auto;
-  flex: 1;               /* Takes all remaining space */
-  padding-bottom: 80px;  /* Keep space for floating add button */
-}
-#addSongBtn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 28px;
-  cursor: pointer;
-  box-shadow: 0 5px 15px rgba(0,0,0,.3);
-  z-index: 1000;
-}
-
 </style>
 </head>
 <body>
 
 <div class="player">
-  <!-- Now Playing Card -->
-  <div class="now-playing">
-    <img id="cover" src="/favIcon.ico">
-   <div id="nowPlayingTitle">
-  <span id="title">No song selected</span>
-</div>
-    <div class="controls">
-      <button onclick="prevSong()"><i class="fa-solid fa-backward"></i></button>
-      <button id="playBtn" onclick="playPause()"><i class="fa-solid fa-play"></i></button>
-      <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
-    </div>
-    <div id="progressContainer">
-      <canvas id="progressCanvas"></canvas>
-    </div>
+  <!-- Now Playing -->
+  <img id="cover" class="cover" src="/favIcon.ico">
+  <div id="title-container"><h2 id="title">No song selected</h2></div>
+
+  <div class="controls">
+    <button onclick="prevSong()"><i class="fa-solid fa-backward"></i></button>
+    <button id="playBtn" onclick="playPause()"><i class="fa-solid fa-play"></i></button>
+    <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
   </div>
 
+  <div id="progressContainer"><canvas id="progressCanvas"></canvas></div>
+
   <!-- Up Next -->
-  <div class="up-next">
-    <h3>Up Next</h3>
-    <ul id="playlist"></ul>
-  </div>
+  <h3 style="margin-top:10px;width:100%;text-align:left;">Up Next</h3>
+  <ul id="playlist"></ul>
 
   <audio id="audio"></audio>
 </div>
@@ -248,18 +162,17 @@ body {
 </div>
 
 <script>
-// Core
 let songs=[], index=0;
 const audio=document.getElementById("audio");
 const title=document.getElementById("title");
 const cover=document.getElementById("cover");
 const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
-
 const progressContainer=document.getElementById("progressContainer");
 const progressCanvas=document.getElementById("progressCanvas");
 const ctx=progressCanvas.getContext("2d");
 
+// Resize canvas
 function resizeCanvas(){progressCanvas.width=progressContainer.clientWidth; progressCanvas.height=progressContainer.clientHeight;}
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -279,61 +192,49 @@ function loadSong(i){
   if(!songs.length) return;
   index=i;
   audio.src=songs[i].src;
-  
-  const titleSpan = document.getElementById("title");
-  titleSpan.textContent = songs[i].title;
-  
-  // Restart scroll animation
-  titleSpan.style.animation = "none";
-  void titleSpan.offsetWidth; // Trigger reflow
-  titleSpan.style.animation = "scrollTitle 10s linear infinite";
-
-  cover.src = songs[i].cover;
+  title.textContent=songs[i].title;
+  cover.src=songs[i].cover;
   updatePlaylist();
 }
 
-
 // Controls
+const playBtn = document.getElementById("playBtn");
+const playIcon = playBtn.querySelector("i");
+
 async function playPause(){
   try {
     if(audio.paused){
       await audio.play();
-      playIcon.classList.remove("fa-play");
-      playIcon.classList.add("fa-pause");
+      playIcon.classList.replace("fa-play","fa-pause");
     } else {
       audio.pause();
-      playIcon.classList.remove("fa-pause");
-      playIcon.classList.add("fa-play");
+      playIcon.classList.replace("fa-pause","fa-play");
     }
-  } catch(e){console.log("Play interrupted", e);}
+  } catch(e){}
 }
+
+audio.addEventListener("pause", ()=> playIcon.classList.replace("fa-pause","fa-play"));
+audio.addEventListener("play", ()=> playIcon.classList.replace("fa-play","fa-pause"));
+
 function nextSong(){if(!songs.length) return; index=(index+1)%songs.length; loadSong(index); audio.play();}
 function prevSong(){if(!songs.length) return; index=(index-1+songs.length)%songs.length; loadSong(index); audio.play();}
 
-// Playlist
+// Playlist / Up Next
 function updatePlaylist(){
   playlist.innerHTML="";
   songs.forEach((s,i)=>{
     const li=document.createElement("li");
-    li.textContent=s.title;
+    const num = document.createElement("span");
+    num.textContent = (i+1)+".";
+    li.appendChild(num);
+    li.appendChild(document.createTextNode(s.title));
     if(i===index) li.classList.add("playing");
     li.onclick=()=>{loadSong(i); audio.play();}
     playlist.appendChild(li);
   });
   const current = playlist.querySelector(".playing");
-  if(current){current.scrollIntoView({behavior:"smooth", block:"start"});}
+  if(current) current.scrollIntoView({behavior:"smooth", block:"start"});
 }
-audio.addEventListener("ended", nextSong);
-
-// Play/Pause icon
-const playBtn = document.getElementById("playBtn");
-const playIcon = playBtn.querySelector("i");
-audio.addEventListener("pause", ()=>{playIcon.classList.replace("fa-pause","fa-play");});
-audio.addEventListener("play", ()=>{playIcon.classList.replace("fa-play","fa-pause");});
-
-// Floating add button click
-const addBtn=document.getElementById("addSongBtn");
-addBtn.addEventListener("click",()=>fileInput.click());
 
 // Animated wave progress
 function drawWaveProgress(){
@@ -341,7 +242,8 @@ function drawWaveProgress(){
   const height=progressCanvas.height;
   ctx.clearRect(0,0,width,height);
   const progressWidth = (audio.currentTime/audio.duration||0) * width;
-  ctx.fillStyle="#555"; ctx.fillRect(0,0,width,height);
+  ctx.fillStyle="#555";
+  ctx.fillRect(0,0,width,height);
   ctx.fillStyle="#38bdf8";
   for(let x=0;x<progressWidth;x++){
     const y=Math.sin((x+Date.now()/50)/10)*height/4 + height/2;
@@ -351,50 +253,16 @@ function drawWaveProgress(){
 }
 drawWaveProgress();
 
-// Seek by clicking
 progressContainer.addEventListener('click', e=>{
   const rect = progressContainer.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
   audio.currentTime = (clickX/rect.width) * audio.duration;
 });
 
-function updatePlaylist(){
-  playlist.innerHTML="";
-  songs.forEach((s,i)=>{
-    const li=document.createElement("li");
-    li.textContent = `${i + 1}. ${s.title}`; // Number the song
-    if(i===index) li.classList.add("playing");
-    li.onclick=()=>{loadSong(i); audio.play();}
-    playlist.appendChild(li);
-  });
-  const current = playlist.querySelector(".playing");
-  if(current){current.scrollIntoView({behavior:"smooth", block:"start"});}
-}
+const addBtn=document.getElementById("addSongBtn");
+addBtn.addEventListener("click",()=>fileInput.click());
 
-function updatePlaylist(){
-  playlist.innerHTML = "";
-  songs.forEach((s, i) => {
-    const li = document.createElement("li");
-    li.textContent = `${i + 1}. ${s.title}`; // Number the song
-    if(i === index){
-      li.classList.add("playing");
-      li.style.fontWeight = "bold";
-      li.style.fontSize = "1.1em"; // Slightly larger
-    } else {
-      li.style.fontWeight = "normal";
-      li.style.fontSize = "1em";
-    }
-    li.onclick = () => { loadSong(i); audio.play(); }
-    playlist.appendChild(li);
-  });
-
-  // Scroll current song into view
-  const current = playlist.querySelector(".playing");
-  if(current){
-    current.scrollIntoView({behavior: "smooth", block: "start"});
-  }
-}
-
+audio.addEventListener("ended", ()=> nextSong());
 </script>
 
 </body>
