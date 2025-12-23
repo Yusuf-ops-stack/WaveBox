@@ -52,17 +52,6 @@ input[type=range]{width:320px;margin:8px 0;}
   font-size:14px; line-height:1.5; text-align:center;
 }
 
-/* Mini Player */
-.mini{
-  height:90px;background:var(--panel);display:flex;align-items:center;padding:10px 20px;
-  position:fixed;bottom:10px;right:10px;border-radius:16px;box-shadow:0 5px 15px rgba(0,0,0,.5);
-  z-index:1000;
-  transition: all 0.3s;
-}
-.mini img{width:55px;height:55px;border-radius:8px;}
-.mini .info{flex:1;margin-left:15px;}
-.mini .controls button{font-size:20px;margin-left:10px;}
-
 /* Install Toast */
 #installToast{
   position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -83,9 +72,6 @@ input[type=range]{width:320px;margin:8px 0;}
   #waveCanvas{height:40px;}
   input[type=range]{width:90%;}
   #playlist li{padding:8px;}
-  .mini{bottom:70px; right:10px; height:70px; padding:5px;}
-  .mini img{width:45px;height:45px;}
-  .mini .controls button{font-size:18px; margin-left:5px;}
 }
 
 /* Hamburger for mobile */
@@ -99,7 +85,7 @@ input[type=range]{width:320px;margin:8px 0;}
 <body>
 
 <!-- Hamburger -->
-<button id="menuToggle">☰</button>
+<button id="menuToggle"><i class="fa-regular fa-rectangle-list"></i></button>
 
 <div class="app">
   <div class="sidebar" id="sidebar">
@@ -111,7 +97,7 @@ input[type=range]{width:320px;margin:8px 0;}
   </div>
 
   <div class="player">
-    <img id="cover" class="cover" src="cover.jpg">
+    <img id="cover" class="cover" src="/favIcon.ico">
     <h2 id="title">No song selected</h2>
 
     <!-- Waveform Canvas -->
@@ -132,16 +118,6 @@ input[type=range]{width:320px;margin:8px 0;}
 
     <audio id="audio"></audio>
   </div>
-</div>
-
-<!-- Mini Player -->
-<div class="mini" id="miniPlayer">
-  <img id="miniCover" src="cover.jpg">
-  <div class="info">
-    <div id="miniTitle">No song</div>
-  </div>
-  <button onclick="playPause()"><i class="fa-solid fa-play"></i></button>
-  <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
 </div>
 
 <!-- Install Toast -->
@@ -166,8 +142,6 @@ let songs=[], index=0, shuffle=false, repeat=false;
 const audio=document.getElementById("audio");
 const title=document.getElementById("title");
 const cover=document.getElementById("cover");
-const miniCover=document.getElementById("miniCover");
-const miniTitle=document.getElementById("miniTitle");
 const volume=document.getElementById("volume");
 const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
@@ -221,8 +195,7 @@ function loadSong(i){
   index=i;
   audio.src=songs[i].src;
   title.textContent=songs[i].title;
-  miniTitle.textContent=songs[i].title;
-  cover.src=miniCover.src=songs[i].cover;
+  cover.src=songs[i].cover;
   lyricsEl.textContent = songs[i].lyrics;
   updatePlaylist();
 }
@@ -246,13 +219,6 @@ function updatePlaylist(){
     playlist.appendChild(li);
   });
 }
-
-// Mini player drag
-const mini=document.getElementById("miniPlayer");
-let isDragging=false, offsetX=0, offsetY=0;
-mini.addEventListener("mousedown", e=>{isDragging=true; offsetX=e.offsetX; offsetY=e.offsetY;});
-document.addEventListener("mouseup", ()=>isDragging=false);
-document.addEventListener("mousemove", e=>{if(!isDragging) return; mini.style.right="auto"; mini.style.bottom="auto"; mini.style.left=e.pageX-offsetX+"px"; mini.style.top=e.pageY-offsetY+"px";});
 
 // PWA install toast
 let deferredPrompt;
