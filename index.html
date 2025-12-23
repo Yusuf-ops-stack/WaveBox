@@ -5,131 +5,54 @@
 <title>WaveBox Music Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#38bdf8">
 <style>
 :root{
-  --bg:#0f172a; --card:#1e293b; --text:#fff; --accent:#38bdf8;
+  --bg:#0f172a; --panel:#020617; --card:#1e293b; --text:#fff; --accent:#38bdf8;
 }
 .light{
-  --bg:#f1f5f9; --card:#e5e7eb; --text:#020617; --accent:#0284c7;
+  --bg:#f1f5f9; --panel:#fff; --card:#e5e7eb; --text:#020617; --accent:#0284c7;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-.player{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 400px;
-  width: 100%;
-  height: 100vh;
-  padding: 20px;
-  box-sizing: border-box;
-}
-.cover{
-  width: 220px;
-  height: 220px;
-  border-radius: 16px;
-  object-fit: cover;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);
-  transition: width 0.3s, height 0.3s;
-  margin-bottom: 15px;
-}
-#title-container{
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  margin-bottom: 15px;
-}
-#title{
-  display: inline-block;
-  font-size: 20px;
-  text-align: center;
-  animation: marquee 10s linear infinite;
-}
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-.controls{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin:15px 0;
-}
-.controls button{
-  background:none;
-  border:none;
-  font-size:26px;
-  margin:0 10px;
-  color: var(--text);
-  cursor:pointer;
-}
-#progressContainer{
-  width:80%;
-  height:8px;
-  background: var(--card);
-  border-radius:4px;
-  margin:10px 0;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
-}
-#progressCanvas{
-  position:absolute;
-  top:0; left:0;
-  width:100%; height:100%;
-}
-#playlist{
-  list-style:none;
-  width:100%;
-  margin-top:15px;
-  overflow-y:auto;
-  flex:1;
-  padding-bottom:80px; /* space for floating button */
-}
-#playlist li{
-  padding:10px;
-  border-radius:8px;
-  cursor:pointer;
-  margin-bottom:5px;
-  background:var(--card);
-  display:flex;
-  align-items:center;
-}
+body{background:var(--bg);color:var(--text);height:100vh;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;}
+
+/* Player container */
+.player{display:flex;flex-direction:column;align-items:center;padding:20px;max-width:400px;width:100%;position:relative;}
+.cover{width:220px;height:220px;border-radius:16px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.5);transition: width 0.3s, height 0.3s;margin-bottom:15px;}
+#title-container{width:100%;overflow:hidden;white-space:nowrap;}
+#title{display:inline-block; padding-left:100%; font-size:20px; text-align:center; animation: scrollText 10s linear infinite;}
+@keyframes scrollText{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
+.controls{display:flex;justify-content:center;align-items:center;margin:15px 0;}
+.controls button{background:none;border:none;font-size:26px;margin:0 10px;color:var(--text);cursor:pointer;}
+input[type=range]{width:80%;margin:10px 0;border-radius:8px;}
+
+/* Animated progress bar */
+#progressContainer{width:80%;height:8px;background:var(--card);border-radius:4px;margin:10px 0;cursor:pointer;position:relative;overflow:hidden;}
+#progressCanvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+
+/* Up Next */
+#playlist{list-style:none;width:100%;margin-top:15px;overflow-y:auto; flex-grow:1;}
+#playlist li{padding:10px;border-radius:8px;cursor:pointer;margin-bottom:5px;background:var(--card);}
 #playlist li:hover{background:var(--accent);}
 #playlist li.playing{background:var(--accent); font-weight:bold;}
-#playlist li span{margin-right:10px;}
+
+/* Floating add button */
 #addSongBtn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background:var(--accent);
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:28px;
-  cursor:pointer;
-  box-shadow:0 5px 15px rgba(0,0,0,.3);
-  z-index:1000;
-  transition:all 0.3s;
+  position:fixed;bottom:20px;right:20px;width:60px;height:60px;
+  border-radius:50%;background:var(--accent);color:#fff;
+  display:flex;justify-content:center;align-items:center;
+  font-size:28px;cursor:pointer;box-shadow:0 5px 15px rgba(0,0,0,.3);
+  z-index:1000;transition:all 0.3s;
 }
 #addSongBtn:hover{transform:scale(1.1);}
 #fileInput{display:none;}
+
+/* Responsive */
 @media(max-width:450px){
   .cover{width:150px;height:150px;}
+  input[type=range]{width:90%;}
   .controls button{font-size:22px;margin:0 5px;}
-  #title{font-size:16px;}
 }
 </style>
 </head>
@@ -146,10 +69,12 @@ body{
     <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
   </div>
 
-  <div id="progressContainer"><canvas id="progressCanvas"></canvas></div>
+  <div id="progressContainer">
+    <canvas id="progressCanvas"></canvas>
+  </div>
 
   <!-- Up Next -->
-  <h3 style="margin-top:10px;width:100%;text-align:left;">Up Next</h3>
+  <h3 style="margin-top:20px;">Up Next</h3>
   <ul id="playlist"></ul>
 
   <audio id="audio"></audio>
@@ -162,12 +87,51 @@ body{
 </div>
 
 <script>
+// IndexedDB for offline songs
+let db;
+const request = indexedDB.open("waveboxDB",1);
+request.onupgradeneeded = e => {
+  db = e.target.result;
+  db.createObjectStore("songs",{keyPath:"id",autoIncrement:true});
+};
+request.onsuccess = e => {
+  db = e.target.result;
+  loadOfflineSongs();
+};
+
+function saveSongOffline(file,title,cover){
+  const tx = db.transaction("songs","readwrite");
+  const store = tx.objectStore("songs");
+  const reader = new FileReader();
+  reader.onload = () => {
+    store.add({title,title,cover,blob:reader.result});
+    tx.oncomplete = ()=>loadOfflineSongs();
+  }
+  reader.readAsArrayBuffer(file);
+}
+
+function loadOfflineSongs(){
+  const tx = db.transaction("songs","readonly");
+  const store = tx.objectStore("songs");
+  const getAll = store.getAll();
+  getAll.onsuccess = ()=> {
+    songs = getAll.result.map(s=>{
+      const url = URL.createObjectURL(new Blob([s.blob]));
+      return {title:s.title,src:url,cover:s.cover};
+    });
+    if(songs.length && !audio.src) loadSong(0);
+    updatePlaylist();
+  };
+}
+
+// Core
 let songs=[], index=0;
 const audio=document.getElementById("audio");
 const title=document.getElementById("title");
 const cover=document.getElementById("cover");
 const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
+
 const progressContainer=document.getElementById("progressContainer");
 const progressCanvas=document.getElementById("progressCanvas");
 const ctx=progressCanvas.getContext("2d");
@@ -180,7 +144,9 @@ resizeCanvas();
 // Add songs
 fileInput.addEventListener("change", () => { 
   [...fileInput.files].forEach(file=>{
-    songs.push({title: file.name.replace(/\.[^/.]+$/, ""), src: URL.createObjectURL(file), cover: "cover.jpg"});
+    const songTitle = file.name.replace(/\.[^/.]+$/, "");
+    songs.push({title:songTitle,src:URL.createObjectURL(file),cover:"cover.jpg"});
+    saveSongOffline(file,songTitle,"cover.jpg");
   });
   if(!audio.src && songs.length) loadSong(0);
   updatePlaylist();
@@ -198,24 +164,18 @@ function loadSong(i){
 }
 
 // Controls
-const playBtn = document.getElementById("playBtn");
-const playIcon = playBtn.querySelector("i");
-
 async function playPause(){
+  const playBtnIcon = document.querySelector("#playBtn i");
   try {
     if(audio.paused){
       await audio.play();
-      playIcon.classList.replace("fa-play","fa-pause");
+      playBtnIcon.classList.replace("fa-play","fa-pause");
     } else {
       audio.pause();
-      playIcon.classList.replace("fa-pause","fa-play");
+      playBtnIcon.classList.replace("fa-pause","fa-play");
     }
-  } catch(e){}
+  } catch(e){console.log(e);}
 }
-
-audio.addEventListener("pause", ()=> playIcon.classList.replace("fa-pause","fa-play"));
-audio.addEventListener("play", ()=> playIcon.classList.replace("fa-play","fa-pause"));
-
 function nextSong(){if(!songs.length) return; index=(index+1)%songs.length; loadSong(index); audio.play();}
 function prevSong(){if(!songs.length) return; index=(index-1+songs.length)%songs.length; loadSong(index); audio.play();}
 
@@ -224,14 +184,12 @@ function updatePlaylist(){
   playlist.innerHTML="";
   songs.forEach((s,i)=>{
     const li=document.createElement("li");
-    const num = document.createElement("span");
-    num.textContent = (i+1)+".";
-    li.appendChild(num);
-    li.appendChild(document.createTextNode(s.title));
+    li.textContent = `${i+1}. ${s.title}`;
     if(i===index) li.classList.add("playing");
     li.onclick=()=>{loadSong(i); audio.play();}
     playlist.appendChild(li);
   });
+
   const current = playlist.querySelector(".playing");
   if(current) current.scrollIntoView({behavior:"smooth", block:"start"});
 }
@@ -241,28 +199,45 @@ function drawWaveProgress(){
   const width=progressCanvas.width;
   const height=progressCanvas.height;
   ctx.clearRect(0,0,width,height);
+
   const progressWidth = (audio.currentTime/audio.duration||0) * width;
+
   ctx.fillStyle="#555";
   ctx.fillRect(0,0,width,height);
+
   ctx.fillStyle="#38bdf8";
   for(let x=0;x<progressWidth;x++){
     const y=Math.sin((x+Date.now()/50)/10)*height/4 + height/2;
     ctx.fillRect(x,y,1,2);
   }
+
   requestAnimationFrame(drawWaveProgress);
 }
 drawWaveProgress();
 
+// Seek by clicking
 progressContainer.addEventListener('click', e=>{
   const rect = progressContainer.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
   audio.currentTime = (clickX/rect.width) * audio.duration;
 });
 
-const addBtn=document.getElementById("addSongBtn");
-addBtn.addEventListener("click",()=>fileInput.click());
+// Floating add button
+document.getElementById("addSongBtn").addEventListener("click",()=>fileInput.click());
 
-audio.addEventListener("ended", ()=> nextSong());
+// Auto next
+audio.addEventListener("ended", ()=>{ nextSong(); });
+
+// Sync play/pause icon
+audio.addEventListener("pause", ()=>document.querySelector("#playBtn i").classList.replace("fa-pause","fa-play"));
+audio.addEventListener("play", ()=>document.querySelector("#playBtn i").classList.replace("fa-play","fa-pause"));
+</script>
+
+<!-- Register Service Worker for Offline -->
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered'));
+}
 </script>
 
 </body>
