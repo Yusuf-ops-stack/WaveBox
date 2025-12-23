@@ -174,13 +174,20 @@ const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
 const lyricsEl=document.getElementById("lyrics");
 
-// Add songs
-fileInput.addEventListener("change",()=>{ 
+// Add multiple songs repeatedly
+fileInput.addEventListener("change", () => { 
   [...fileInput.files].forEach(file=>{
-    songs.push({title:file.name.replace(/\.[^/.]+$/,""),src:URL.createObjectURL(file),cover:"cover.jpg",lyrics:"Lyrics not available"});
+    songs.push({
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      src: URL.createObjectURL(file),
+      cover: "cover.jpg",
+      lyrics: "Lyrics not available"
+    });
   });
-  if(songs.length===fileInput.files.length) loadSong(0);
+
+  if (!audio.src && songs.length > 0) loadSong(0);
   updatePlaylist();
+  fileInput.value = ""; // allow re-selecting same files
 });
 
 // Load song
@@ -196,10 +203,7 @@ function loadSong(i){
 }
 
 // Controls
-async function playPause(){
-  try{audio.paused?await audio.play():audio.pause();}
-  catch(e){console.log("Play interrupted")}
-}
+async function playPause(){try{audio.paused?await audio.play():audio.pause();}catch(e){console.log("Play interrupted")}}
 function nextSong(){if(!songs.length) return; index = shuffle?Math.floor(Math.random()*songs.length):(index+1)%songs.length; loadSong(index); audio.play();}
 function prevSong(){if(!songs.length) return; index = (index-1+songs.length)%songs.length; loadSong(index); audio.play();}
 function toggleShuffle(){shuffle=!shuffle;}
