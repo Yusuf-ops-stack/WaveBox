@@ -5,7 +5,6 @@
 <title>WaveBox Music Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#38bdf8">
 <style>
 :root{
@@ -15,94 +14,58 @@
   --bg:#f1f5f9; --panel:#fff; --card:#e5e7eb; --text:#020617; --accent:#0284c7;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:var(--bg);color:var(--text);height:100vh;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:center;}
 
 /* Layout */
-.app{display:flex;height:100vh;flex-direction:row;}
-.sidebar{width:220px;background:var(--panel);padding:20px;flex-shrink:0;transition: transform 0.3s ease;}
-.sidebar h1{color:var(--accent)}
+.app{display:flex;width:100%;max-width:900px;flex-direction:row;box-shadow:0 0 20px rgba(0,0,0,0.3);border-radius:16px;overflow:hidden;background:var(--panel);}
+.sidebar{width:220px;background:var(--panel);padding:20px;flex-shrink:0;transition: transform 0.3s ease;display:flex;flex-direction:column;align-items:center;}
+.sidebar h1{color:var(--accent);margin-bottom:10px;}
 .sidebar label, .sidebar button{
-  margin-top:10px;padding:8px;width:100%;border:none;border-radius:8px;
-  background:var(--accent);color:white;cursor:pointer;display:block;text-align:center;
+  margin-top:10px;padding:10px;width:100%;border:none;border-radius:8px;
+  background:var(--accent);color:white;cursor:pointer;text-align:center;
 }
-.player{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;position:relative;overflow-y:auto;}
-.cover{width:220px;height:220px;border-radius:16px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.5);transition: width 0.3s, height 0.3s;}
+.player{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;width:100%;}
+.cover{width:220px;height:220px;border-radius:16px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.5);transition: width 0.3s, height 0.3s;margin-bottom:15px;}
+#title{margin:10px 0;font-size:20px;text-align:center;}
+.controls{display:flex;justify-content:center;align-items:center;margin:15px 0;}
 .controls button{background:none;border:none;font-size:26px;margin:0 10px;color:var(--text);cursor:pointer;}
-input[type=range]{width:320px;margin:8px 0;}
+input[type=range]{width:80%;margin:10px 0;border-radius:8px;}
+#playlist{list-style:none;width:100%;max-width:400px;margin-top:15px;}
+#playlist li{padding:10px;border-radius:8px;cursor:pointer;margin-bottom:5px;background:var(--card);}
+#playlist li.active,#playlist li:hover{background:var(--accent);}
 
-/* Waveform progress */
-#waveCanvas{
-  width: 90%;
-  max-width: 400px;
-  height: 60px;
-  margin: 15px 0;
-  border-radius: 12px;
-  background: var(--card);
-}
-
-/* Playlist */
-#playlist{list-style:none;width:100%;margin-top:15px;}
-#playlist li{padding:10px;border-radius:8px;cursor:pointer;}
-#playlist li.active,#playlist li:hover{background:var(--card);}
-
-/* Install Toast */
-#installToast{
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  background: #38bdf8; color: white; padding: 12px 20px; border-radius: 8px;
-  display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 2000;
-  transition: opacity 0.3s ease, bottom 0.3s ease;
-}
-#installToast.show{display: block; opacity: 1; bottom: 20px;}
-#installToast.hide{opacity: 0; bottom: 0;}
-
-/* Responsive - mobile */
+/* Responsive */
 @media(max-width:700px){
-  .app{flex-direction:column;}
-  .sidebar{width:100%; transform: translateY(-100%);}
-  .sidebar.active{transform: translateY(0);}
-  .player{padding:10px;}
+  body{padding:10px;}
+  .app{flex-direction:column;width:100%;}
+  .sidebar{width:100%;flex-direction:row;justify-content:space-around;padding:10px;order:2;}
+  .player{width:100%;padding:10px;order:1;}
   .cover{width:150px;height:150px;}
-  #waveCanvas{height:40px;}
-  input[type=range]{width:90%;}
-  #playlist li{padding:8px;}
+  input[type=range]{width:95%;}
+  #playlist li{padding:8px;font-size:14px;}
+  .controls button{font-size:22px;margin:0 5px;}
 }
-
-/* Hamburger for mobile */
-#menuToggle{
-  display:none; position:fixed; top:10px; left:10px; z-index:2000;
-  background:var(--accent); border:none; color:#fff; padding:10px; border-radius:8px; font-size:20px; cursor:pointer;
-}
-@media(max-width:700px){#menuToggle{display:block;}}
 </style>
 </head>
 <body>
 
-<!-- Hamburger -->
-<button id="menuToggle"><i class="fa-regular fa-rectangle-list"></i></button>
-
 <div class="app">
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar">
     <h1>🎧 WaveBox</h1>
-    <p>Feel Every Wave</p>
     <label>➕ Add Songs<input type="file" id="fileInput" multiple accept="audio/*" hidden></label>
-    <button onclick="toggleTheme()">🌗 Toggle Theme</button>
-    <button id="installBtn">📥 Install App</button>
+    <button onclick="toggleTheme()">🌗 Theme</button>
   </div>
 
   <div class="player">
     <img id="cover" class="cover" src="/favIcon.ico">
     <h2 id="title">No song selected</h2>
 
-    <!-- Waveform Canvas -->
-    <canvas id="waveCanvas"></canvas>
-
     <div class="controls">
-      <button onclick="toggleShuffle()"><i class="fa-solid fa-shuffle"></i></button>
       <button onclick="prevSong()"><i class="fa-solid fa-backward"></i></button>
       <button onclick="playPause()"><i class="fa-solid fa-play"></i></button>
       <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
-      <button onclick="toggleRepeat()"><i class="fa-solid fa-repeat"></i></button>
     </div>
+
     <input type="range" id="volume" min="0" max="1" step="0.01">
     <ul id="playlist"></ul>
 
@@ -110,74 +73,25 @@ input[type=range]{width:320px;margin:8px 0;}
   </div>
 </div>
 
-<!-- Install Toast -->
-<div id="installToast">
-  Install WaveBox to your device!
-  <button id="toastInstallBtn" style="
-    margin-left: 12px; padding: 6px 12px; border: none; border-radius: 6px;
-    background: white; color: #38bdf8; cursor: pointer;
-  ">Install</button>
-</div>
-
 <script>
-// Sidebar toggle
-const sidebar = document.getElementById('sidebar');
-const menuToggle = document.getElementById('menuToggle');
-menuToggle.addEventListener('click', () => {
-  sidebar.classList.toggle('active');
-});
-
 // Core
-let songs=[], index=0, shuffle=false, repeat=false;
+let songs=[], index=0;
 const audio=document.getElementById("audio");
 const title=document.getElementById("title");
 const cover=document.getElementById("cover");
 const volume=document.getElementById("volume");
 const playlist=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
-const waveCanvas=document.getElementById("waveCanvas");
-const waveCtx=waveCanvas.getContext("2d");
 
-// Resize canvas
-function resizeCanvas(){waveCanvas.width = waveCanvas.clientWidth; waveCanvas.height = waveCanvas.clientHeight;}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-// Draw wave progress
-function drawWave(){
-  const width=waveCanvas.width, height=waveCanvas.height;
-  waveCtx.clearRect(0,0,width,height);
-
-  const progressWidth = (audio.currentTime/audio.duration||0) * width;
-
-  // Background bar
-  waveCtx.fillStyle = "#555";
-  waveCtx.fillRect(0, height/3, width, height/3);
-
-  // Progress bar
-  waveCtx.fillStyle = "#38bdf8";
-  waveCtx.fillRect(0, height/3, progressWidth, height/3);
-
-  requestAnimationFrame(drawWave);
-}
-drawWave();
-
-// Add multiple songs
 fileInput.addEventListener("change", () => { 
   [...fileInput.files].forEach(file=>{
-    songs.push({
-      title: file.name.replace(/\.[^/.]+$/, ""),
-      src: URL.createObjectURL(file),
-      cover: "cover.jpg"
-    });
+    songs.push({title: file.name.replace(/\.[^/.]+$/, ""), src: URL.createObjectURL(file), cover: "cover.jpg"});
   });
-
-  if (!audio.src && songs.length > 0) loadSong(0);
+  if(!audio.src && songs.length) loadSong(0);
   updatePlaylist();
-  fileInput.value = ""; // allow re-selecting same files
+  fileInput.value="";
 });
 
-// Load song
 function loadSong(i){
   if(!songs.length) return;
   index=i;
@@ -187,15 +101,11 @@ function loadSong(i){
   updatePlaylist();
 }
 
-// Controls
-async function playPause(){try{audio.paused?await audio.play():audio.pause();}catch(e){console.log("Play interrupted")}}
-function nextSong(){if(!songs.length) return; index = shuffle?Math.floor(Math.random()*songs.length):(index+1)%songs.length; loadSong(index); audio.play();}
-function prevSong(){if(!songs.length) return; index = (index-1+songs.length)%songs.length; loadSong(index); audio.play();}
-function toggleShuffle(){shuffle=!shuffle;}
-function toggleRepeat(){repeat=!repeat; audio.loop=repeat;}
+async function playPause(){try{audio.paused?await audio.play():audio.pause();}catch(e){}}
+function nextSong(){if(!songs.length) return; index=(index+1)%songs.length; loadSong(index); audio.play();}
+function prevSong(){if(!songs.length) return; index=(index-1+songs.length)%songs.length; loadSong(index); audio.play();}
 function toggleTheme(){document.body.classList.toggle("light");}
 
-// Playlist
 function updatePlaylist(){
   playlist.innerHTML="";
   songs.forEach((s,i)=>{
@@ -206,32 +116,6 @@ function updatePlaylist(){
     playlist.appendChild(li);
   });
 }
-
-// PWA install toast
-let deferredPrompt;
-const installToast = document.getElementById('installToast');
-const toastBtn = document.getElementById('toastInstallBtn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installToast.classList.add('show');
-});
-
-toastBtn.addEventListener('click', async () => {
-  installToast.classList.remove('show');
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('User response to install:', outcome);
-    deferredPrompt = null;
-  }
-});
-
-document.getElementById('installBtn').addEventListener('click', () => {
-  installToast.classList.add('show');
-  setTimeout(()=>installToast.classList.remove('show'), 5000);
-});
 </script>
 
 </body>
