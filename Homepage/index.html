@@ -5,245 +5,202 @@
 <title>WaveBox Music Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#38bdf8">
 <style>
 :root{
   --bg:#0f172a; --panel:#020617; --card:#1e293b; --text:#fff; --accent:#38bdf8;
 }
-.light{
-  --bg:#f1f5f9; --panel:#fff; --card:#e5e7eb; --text:#020617; --accent:#0284c7;
+body{
+  margin:0; font-family:Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+  display:flex; justify-content:center; align-items:flex-start;
+  padding:20px; min-height:100vh;
 }
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:var(--bg);color:var(--text);height:100vh;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;}
 
 /* Player container */
-.player{display:flex;flex-direction:column;align-items:center;padding:20px;max-width:400px;width:100%;position:relative;}
-.cover{width:220px;height:220px;border-radius:16px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,.5);transition: width 0.3s, height 0.3s;margin-bottom:15px;}
-#title-container{width:100%;overflow:hidden;white-space:nowrap;}
-#title{display:inline-block; padding-left:100%; font-size:20px; text-align:center; animation: scrollText 10s linear infinite;}
-@keyframes scrollText{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
-.controls{display:flex;justify-content:center;align-items:center;margin:15px 0;}
-.controls button{background:none;border:none;font-size:26px;margin:0 10px;color:var(--text);cursor:pointer;}
-input[type=range]{width:80%;margin:10px 0;border-radius:8px;}
+.player{
+  display:flex; flex-direction:column; align-items:center;
+  width:100%; max-width:400px; gap:20px;
+}
 
-/* Animated progress bar */
-#progressContainer{width:80%;height:8px;background:var(--card);border-radius:4px;margin:10px 0;cursor:pointer;position:relative;overflow:hidden;}
-#progressCanvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+/* Desktop layout */
+@media(min-width:768px){
+  .player{flex-direction:row; max-width:900px; gap:30px; height:80vh;}
+  .now-playing{flex:1; display:flex; flex-direction:column; align-items:center;}
+  .up-next{flex:1; display:flex; flex-direction:column; height:100%;}
+  #playlist{overflow-y:auto; flex:1;}
+}
 
-/* Up Next */
-#playlist{list-style:none;width:100%;margin-top:15px;overflow-y:auto; flex-grow:1;}
-#playlist li{padding:10px;border-radius:8px;cursor:pointer;margin-bottom:5px;background:var(--card);}
+/* Cover and title */
+.cover{
+  width:180px; height:180px; border-radius:16px; object-fit:cover;
+  box-shadow:0 8px 25px rgba(0,0,0,.5); transition: all 0.3s;
+}
+@media(min-width:768px){ .cover{width:220px;height:220px;} }
+
+#title-container{width:100%; text-align:center; margin:10px 0;}
+#title{
+  font-size:18px; white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; animation:none;
+}
+
+/* Controls */
+.controls{display:flex; justify-content:center; align-items:center; gap:15px;}
+.controls button{
+  background:none; border:none; color:var(--text);
+  font-size:24px; cursor:pointer;
+}
+@media(min-width:768px){ .controls button{font-size:28px;} }
+
+/* Progress bar */
+#progressContainer{
+  width:90%; max-width:400px; height:8px; background:var(--card);
+  border-radius:4px; position:relative; cursor:pointer; overflow:hidden; margin:10px 0;
+}
+#progressCanvas{position:absolute; top:0; left:0; width:100%; height:100%;}
+
+/* Playlist */
+#playlist{list-style:none; padding:0 10px; margin:0; max-height:300px; overflow-y:auto;}
+#playlist li{
+  padding:10px; margin-bottom:5px; border-radius:8px; background:var(--card);
+  display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+  transition:0.2s;
+}
 #playlist li:hover{background:var(--accent);}
 #playlist li.playing{background:var(--accent); font-weight:bold;}
 
-/* Floating add button */
+/* Floating Add Button */
 #addSongBtn{
-  position:fixed;bottom:20px;right:20px;width:60px;height:60px;
-  border-radius:50%;background:var(--accent);color:#fff;
-  display:flex;justify-content:center;align-items:center;
-  font-size:28px;cursor:pointer;box-shadow:0 5px 15px rgba(0,0,0,.3);
-  z-index:1000;transition:all 0.3s;
+  position:fixed; bottom:20px; right:20px; width:55px; height:55px;
+  border-radius:50%; background:var(--accent); color:#fff;
+  display:flex; justify-content:center; align-items:center;
+  font-size:24px; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,.3);
+  z-index:1000; transition:0.3s;
 }
 #addSongBtn:hover{transform:scale(1.1);}
 #fileInput{display:none;}
 
 /* Responsive */
 @media(max-width:450px){
-  .cover{width:150px;height:150px;}
-  input[type=range]{width:90%;}
-  .controls button{font-size:22px;margin:0 5px;}
+  .cover{width:150px; height:150px;}
+  .controls button{font-size:22px;}
 }
 </style>
 </head>
 <body>
 
 <div class="player">
-  <!-- Now Playing -->
-  <img id="cover" class="cover" src="/favIcon.ico">
-  <div id="title-container"><h2 id="title">No song selected</h2></div>
+  <div class="now-playing">
+    <img id="cover" class="cover" src="/favIcon.ico">
+    <div id="title-container"><h2 id="title">No song selected</h2></div>
 
-  <div class="controls">
-    <button onclick="prevSong()"><i class="fa-solid fa-backward"></i></button>
-    <button id="playBtn" onclick="playPause()"><i class="fa-solid fa-play"></i></button>
-    <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
+    <div class="controls">
+      <button onclick="prevSong()"><i class="fa-solid fa-backward"></i></button>
+      <button id="playBtn" onclick="playPause()"><i class="fa-solid fa-play"></i></button>
+      <button onclick="nextSong()"><i class="fa-solid fa-forward"></i></button>
+    </div>
+
+    <div id="progressContainer">
+      <canvas id="progressCanvas"></canvas>
+    </div>
+    <audio id="audio"></audio>
   </div>
 
-  <div id="progressContainer">
-    <canvas id="progressCanvas"></canvas>
+  <div class="up-next">
+    <h3>Up Next</h3>
+    <ul id="playlist"></ul>
   </div>
-
-  <!-- Up Next -->
-  <h3 style="margin-top:20px;">Up Next</h3>
-  <ul id="playlist"></ul>
-
-  <audio id="audio"></audio>
 </div>
 
-<!-- Floating Add Song Button -->
-<label id="addSongBtn" for="fileInput" title="Add Songs">
-  <i class="fa-solid fa-plus"></i>
-</label>
-
-<input
-  type="file"
-  id="fileInput"
-  multiple
-  accept="audio/*"
-  style="display:none"
-/>
-
+<label id="addSongBtn" for="fileInput"><i class="fa-solid fa-plus"></i></label>
+<input type="file" id="fileInput" multiple accept="audio/*">
 
 <script>
-// IndexedDB for offline songs
-let db;
-const request = indexedDB.open("waveboxDB",1);
-request.onupgradeneeded = e => {
-  db = e.target.result;
-  db.createObjectStore("songs",{keyPath:"id",autoIncrement:true});
-};
-request.onsuccess = e => {
-  db = e.target.result;
-  loadOfflineSongs();
-};
-
-function saveSongOffline(file,title,cover){
-  const tx = db.transaction("songs","readwrite");
-  const store = tx.objectStore("songs");
-  const reader = new FileReader();
-  reader.onload = () => {
-    store.add({title,title,cover,blob:reader.result});
-    tx.oncomplete = ()=>loadOfflineSongs();
-  }
-  reader.readAsArrayBuffer(file);
-}
-
-function loadOfflineSongs(){
-  const tx = db.transaction("songs","readonly");
-  const store = tx.objectStore("songs");
-  const getAll = store.getAll();
-  getAll.onsuccess = ()=> {
-    songs = getAll.result.map(s=>{
-      const url = URL.createObjectURL(new Blob([s.blob]));
-      return {title:s.title,src:url,cover:s.cover};
-    });
-    if(songs.length && !audio.src) loadSong(0);
-    updatePlaylist();
-  };
-}
-
-// Core
 let songs=[], index=0;
 const audio=document.getElementById("audio");
-const title=document.getElementById("title");
-const cover=document.getElementById("cover");
-const playlist=document.getElementById("playlist");
+const titleEl=document.getElementById("title");
+const coverEl=document.getElementById("cover");
+const playlistEl=document.getElementById("playlist");
 const fileInput=document.getElementById("fileInput");
-
 const progressContainer=document.getElementById("progressContainer");
 const progressCanvas=document.getElementById("progressCanvas");
 const ctx=progressCanvas.getContext("2d");
 
-// Resize canvas
+// Canvas resize
 function resizeCanvas(){progressCanvas.width=progressContainer.clientWidth; progressCanvas.height=progressContainer.clientHeight;}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-// Add songs
-fileInput.addEventListener("change", () => { 
-  [...fileInput.files].forEach(file=>{
-    const songTitle = file.name.replace(/\.[^/.]+$/, "");
-    songs.push({title:songTitle,src:URL.createObjectURL(file),cover:"cover.jpg"});
-    saveSongOffline(file,songTitle,"cover.jpg");
-  });
-  if(!audio.src && songs.length) loadSong(0);
-  updatePlaylist();
-  fileInput.value="";
-});
+window.addEventListener("resize",resizeCanvas); resizeCanvas();
 
 // Load song
 function loadSong(i){
   if(!songs.length) return;
   index=i;
   audio.src=songs[i].src;
-  title.textContent=songs[i].title;
-  cover.src=songs[i].cover;
+  titleEl.textContent=songs[i].title;
+  coverEl.src=songs[i].cover||"/favIcon.ico";
   updatePlaylist();
 }
 
-// Controls
+// Play/pause
 async function playPause(){
-  const playBtnIcon = document.querySelector("#playBtn i");
-  try {
-    if(audio.paused){
-      await audio.play();
-      playBtnIcon.classList.replace("fa-play","fa-pause");
-    } else {
-      audio.pause();
-      playBtnIcon.classList.replace("fa-pause","fa-play");
-    }
-  } catch(e){console.log(e);}
+  const icon=document.querySelector("#playBtn i");
+  try{
+    if(audio.paused){ await audio.play(); icon.classList.replace("fa-play","fa-pause"); }
+    else{ audio.pause(); icon.classList.replace("fa-pause","fa-play"); }
+  }catch(e){ console.log(e);}
 }
 function nextSong(){if(!songs.length) return; index=(index+1)%songs.length; loadSong(index); audio.play();}
 function prevSong(){if(!songs.length) return; index=(index-1+songs.length)%songs.length; loadSong(index); audio.play();}
 
-// Playlist / Up Next
+// Playlist
 function updatePlaylist(){
-  playlist.innerHTML="";
+  playlistEl.innerHTML="";
   songs.forEach((s,i)=>{
     const li=document.createElement("li");
-    li.textContent = `${i+1}. ${s.title}`;
+    li.textContent=`${i+1}. ${s.title}`;
     if(i===index) li.classList.add("playing");
-    li.onclick=()=>{loadSong(i); audio.play();}
-    playlist.appendChild(li);
+    li.onclick=()=>{ loadSong(i); audio.play(); }
+    playlistEl.appendChild(li);
   });
-
-  const current = playlist.querySelector(".playing");
+  const current=playlistEl.querySelector(".playing");
   if(current) current.scrollIntoView({behavior:"smooth", block:"start"});
 }
 
-// Animated wave progress
+// Add songs
+fileInput.addEventListener("change",()=>{
+  [...fileInput.files].forEach(file=>{
+    const title=file.name.replace(/\.[^/.]+$/,"");
+    songs.push({title, src:URL.createObjectURL(file), cover:"/favIcon.ico"});
+  });
+  if(!audio.src && songs.length) loadSong(0);
+  updatePlaylist();
+  fileInput.value="";
+});
+
+// Progress wave
 function drawWaveProgress(){
-  const width=progressCanvas.width;
-  const height=progressCanvas.height;
-  ctx.clearRect(0,0,width,height);
-
-  const progressWidth = (audio.currentTime/audio.duration||0) * width;
-
-  ctx.fillStyle="#555";
-  ctx.fillRect(0,0,width,height);
-
+  const w=progressCanvas.width, h=progressCanvas.height;
+  ctx.clearRect(0,0,w,h);
+  const progressWidth=(audio.currentTime/audio.duration||0)*w;
+  ctx.fillStyle="#555"; ctx.fillRect(0,0,w,h);
   ctx.fillStyle="#38bdf8";
   for(let x=0;x<progressWidth;x++){
-    const y=Math.sin((x+Date.now()/50)/10)*height/4 + height/2;
+    const y=Math.sin((x+Date.now()/50)/10)*h/4 + h/2;
     ctx.fillRect(x,y,1,2);
   }
-
   requestAnimationFrame(drawWaveProgress);
 }
 drawWaveProgress();
 
-// Seek by clicking
-progressContainer.addEventListener('click', e=>{
-  const rect = progressContainer.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  audio.currentTime = (clickX/rect.width) * audio.duration;
+// Seek
+progressContainer.addEventListener("click",e=>{
+  const rect=progressContainer.getBoundingClientRect();
+  audio.currentTime=((e.clientX-rect.left)/rect.width)*audio.duration;
 });
 
-
 // Auto next
-audio.addEventListener("ended", ()=>{ nextSong(); });
-
-// Sync play/pause icon
-audio.addEventListener("pause", ()=>document.querySelector("#playBtn i").classList.replace("fa-pause","fa-play"));
-audio.addEventListener("play", ()=>document.querySelector("#playBtn i").classList.replace("fa-play","fa-pause"));
-</script>
-
-<!-- Register Service Worker for Offline -->
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered'));
-}
+audio.addEventListener("ended",()=>nextSong());
+audio.addEventListener("pause",()=>document.querySelector("#playBtn i").classList.replace("fa-pause","fa-play"));
+audio.addEventListener("play",()=>document.querySelector("#playBtn i").classList.replace("fa-play","fa-pause"));
 </script>
 
 </body>
