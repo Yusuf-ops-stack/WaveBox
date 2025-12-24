@@ -81,10 +81,18 @@ input[type=range]{width:80%;margin:10px 0;border-radius:8px;}
 </div>
 
 <!-- Floating Add Song Button -->
-<div id="addSongBtn" title="Add Songs">
+<label id="addSongBtn" for="fileInput" title="Add Songs">
   <i class="fa-solid fa-plus"></i>
-  <input type="file" id="fileInput" multiple accept="audio/*">
-</div>
+</label>
+
+<input
+  type="file"
+  id="fileInput"
+  multiple
+  accept="audio/*"
+  style="display:none"
+/>
+
 
 <script>
 // IndexedDB for offline songs
@@ -222,8 +230,6 @@ progressContainer.addEventListener('click', e=>{
   audio.currentTime = (clickX/rect.width) * audio.duration;
 });
 
-// Floating add button
-document.getElementById("addSongBtn").addEventListener("click",()=>fileInput.click());
 
 // Auto next
 audio.addEventListener("ended", ()=>{ nextSong(); });
